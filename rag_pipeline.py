@@ -3,7 +3,7 @@ import faiss
 from sentence_transformers import SentenceTransformer
 
 EMBEDDING_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
-GROQ_MODEL_NAME = "llama-3.3-70b-versatile"
+GROQ_MODEL_NAME = "openai/gpt-oss-120b"
 
 @__import__("functools").lru_cache(maxsize=1)
 def get_embedding_model():

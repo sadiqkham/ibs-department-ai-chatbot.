@@ -3,7 +3,7 @@ import faiss
 from sentence_transformers import SentenceTransformer
 
 EMBEDDING_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
-GROQ_MODEL_NAME = "openai/gpt-oss-120be"
+GROQ_MODEL_NAME = "llama-3.3-70b-versatile"
 
 @__import__("functools").lru_cache(maxsize=1)
 def get_embedding_model():
@@ -44,24 +44,14 @@ def answer_question(client, question, retrieved_chunks):
             f"[Document: {item['document']} | Page: {item['page']}]\n{item['text']}"
         )
     context = "\n\n---\n\n".join(context_parts)
-    
-    
-system_prompt = ( """
-You are the official IBS Department timetable assistant.
-
-Rules:
-1. Answer only using the retrieved timetable document text.
-2. Never guess or invent class schedules.
-3. If the user asks for Monday's schedule without specifying a class or semester,
-   ask which program and semester they mean.
-4. If the user asks for BBA 7, show only entries explicitly associated with BBA 7.
-5. Include only classes clearly listed for the requested weekday.
-6. Present results in a table with Time, Subject, Teacher, and Room.
-7. If the PDF text is unclear or incomplete, explain this instead of guessing.
-8. If no matching timetable entries are found, say so.
-9. Include the source document and page number when possible.
-""" )
-
+    system_prompt = (
+        "You are the IBS Department AI Assistant for university students. "
+        "Answer questions using only the supplied document context. "
+        "Do not invent teacher names, class times, rooms, policies, or other facts. "
+        "If the context does not contain the answer, clearly say that you could not find it "
+        "in the provided documents and recommend checking with the department. "
+        "Be helpful, concise, and use simple English. When useful, mention the document name and page."
+    )
     user_prompt = f"DOCUMENT CONTEXT:\n{context}\n\nSTUDENT QUESTION:\n{question}"
     completion = client.chat.completions.create(
         model=GROQ_MODEL_NAME,
